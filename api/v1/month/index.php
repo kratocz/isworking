@@ -1,6 +1,17 @@
 <?php
 $startDateString = "2022-12-01";
 
+function getPercentageByDayInMonth($dayInMonth, $totalDaysInMonth) {
+    $percentage = $dayInMonth / ($totalDaysInMonth - 2);
+    if ($percentage < 0) {
+        $percentage = 0;
+    }
+    if ($percentage > 1) {
+        $percentage = 1;
+    }
+    return $percentage;
+}
+
 function api($feature, $postBody = false)
 {
     global $ch;
@@ -77,12 +88,14 @@ while ($month == $date->format("m")) {
     if ($dateString <= Date("Y-m-d")) {
         $daysWorkedHours[$dateString] = 0;
     }
+    $dayInMonthPercentage = getPercentageByDayInMonth($dayInMonth, $totalDaysInMonth);
+    //var_dump($dayInMonthPercentage);
     $daysLabel[$dateString] = $dayInMonth;
-    $minLineHours[$dateString] = $dayInMonth / $totalDaysInMonth * 140;
-    $optimalLineHours[$dateString] = $dayInMonth / $totalDaysInMonth * 160;
-    $maxLineHours[$dateString] = $dayInMonth / $totalDaysInMonth * 200;
-    $redHours = $dayInMonth / ($totalDaysInMonth - 2) * 140 - ($totalDaysInMonth - 2 - $dayInMonth) * 2;
-    $redHoursLimited =max(0, min(140, $redHours));
+    $minLineHours[$dateString] = $dayInMonthPercentage * 140;
+    $optimalLineHours[$dateString] = $dayInMonthPercentage * 168;
+    $maxLineHours[$dateString] = $dayInMonthPercentage * 200;
+    $redHours = $dayInMonthPercentage * 140 - ($totalDaysInMonth - 2 - $dayInMonth) * 2;
+    $redHoursLimited = max(0, min(140, $redHours));
         $redLineHours[$dateString] = $redHoursLimited;
     $date->modify("+1 day");
     $dayInMonth++;
