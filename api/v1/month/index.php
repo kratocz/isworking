@@ -1,5 +1,6 @@
 <?php
-$startDateString = "2022-12-01";
+$currentDateTime = new DateTime();
+$startDateString = $currentDateTime->format('Y-m-01');
 
 $timezoneString = getenv('TZ');
 if ($timezoneString) {
