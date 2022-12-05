@@ -14,9 +14,12 @@ function init() {
 function updateChart() {
 	const xhttp = new XMLHttpRequest();
 	xhttp.onload = function () {
-		const data = JSON.parse(this.response);
-		console.debug("API response:", data);
-		chart.data = data;
+		const response = JSON.parse(this.response);
+		console.debug("API response:", response);
+		console.debug(response.metadata);
+		chart.data = response.chartData;
+		document.getElementById('isCurrentlyWorking-true').style.display = response.metadata.currentlyWorking ? 'inline' : 'none';
+		document.getElementById('isCurrentlyWorking-false').style.display = !response.metadata.currentlyWorking ? 'inline' : 'none';
 		chart.update('none');
 		const date = new Date();
 		document.getElementById('last-update-text').innerText = date.toLocaleString();

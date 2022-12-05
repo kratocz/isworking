@@ -125,7 +125,7 @@ while ($month == $date->format("m")) {
     $date->modify("+1 day");
 }
 
-$data = [
+$chartData = [
     'labels' => array_values($daysLabel),
     'datasets' => [
         [
@@ -165,5 +165,16 @@ $data = [
         ],
     ],
 ];
+
+$currentEntry = api("/api/v9/me/time_entries/current");
+$isCurrentlyWorking = $currentEntry && in_array($currentEntry->project_id, $projectIds);
+
+$data = [
+    "chartData" => $chartData,
+    "metadata" => [
+        "currentlyWorking" => $isCurrentlyWorking,
+    ],
+];
+
 header('Content-Type: application/json; charset=utf-8');
 echo json_encode($data, JSON_PRETTY_PRINT);
