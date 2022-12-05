@@ -1,6 +1,11 @@
 <?php
 $startDateString = "2022-12-01";
 
+$timezoneString = getenv('TZ');
+if ($timezoneString) {
+    date_default_timezone_set($timezoneString);
+}
+
 function getPercentageByDayInMonth($dayInMonth, $totalDaysInMonth) {
     $percentage = $dayInMonth / ($totalDaysInMonth - 2);
     if ($percentage < 0) {
