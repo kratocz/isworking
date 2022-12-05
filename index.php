@@ -29,7 +29,7 @@ $title = getenv('CHART_TITLE');
 </canvas>
 <script>
     init();
-	updateChart();
+	updateChartFromServer();
 </script>
 
 
