@@ -101,13 +101,21 @@ while ($month == $date->format("m")) {
     $dayInMonth++;
 }
 
+$lastEntryBeforeNow = null;
 foreach ($entries as $entry) {
     //var_dump($entry->start);
+    //var_dump($entry->stop);
+    //var_dump($entry);
     if ($entry->billable && in_array($entry->project_id, $projectIds)) {
         $entryStartDateString = substr($entry->start, 10);
         $duration = $entry->duration >= 0 ? $entry->duration : $entry->duration = time() + $entry->duration;
         $daysWorkedHours[substr($entry->start, 0, 10)] += $duration / 3600;
         //var_dump([$entry->duration, $duration / 3600]);
+    }
+    if (($entry->stop ?? false) && in_array($entry->project_id, $projectIds)) {
+        if (!$lastEntryBeforeNow || $lastEntryBeforeNow->stop < $entry->stop) {
+            $lastEntryBeforeNow = $entry;
+        }
     }
 }
 //var_dump($durations);
@@ -172,7 +180,8 @@ $isCurrentlyWorking = $currentEntry && in_array($currentEntry->project_id, $proj
 $data = [
     "chartData" => $chartData,
     "metadata" => [
-        "currentlyWorking" => $isCurrentlyWorking,
+        'currentlyWorking' => $isCurrentlyWorking,
+        'lastEntryBeforeNowStopDateTime' => $lastEntryBeforeNow->stop,
     ],
 ];
 
