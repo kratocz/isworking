@@ -25,3 +25,15 @@ h1 {
     right: 20px;
 }
 
+#alert3 {
+    font-family: "Helvetica Neue",Helvetica,Arial;
+    font-size: 150%;
+    margin-bottom: 1em;
+}
+
+#alert3Warning {
+    color: #f22;
+    background-color: #e0e0e0;
+    padding: 10px;
+}
+

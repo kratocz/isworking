@@ -23,13 +23,18 @@ function updateChart(response) {
 	console.debug('latestDay:', response.metadata.latestDay);
 	let alertText = "";
 	let htmlBodyBackgroundColor = '';
+	let alert3Html = "";
 	if (response.metadata.latestDay.reality < response.metadata.latestDay.critical) {
 		htmlBodyBackgroundColor = '#fee';
 		alertText = "Red alert";
+		if (!response.metadata.currentlyWorking) {
+			alert3Html = "Napiště mi: <span id='alert3Warning'>Pracuj!</span>";
+		}
 	}
 	document.body.style.backgroundColor = htmlBodyBackgroundColor;
 	document.getElementById('alert1').innerText = alertText;
 	document.getElementById('alert2').innerText = alertText;
+	document.getElementById('alert3').innerHTML = alert3Html;
 }
 
 function updateChartFromServer() {

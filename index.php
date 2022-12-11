@@ -26,6 +26,7 @@ $title = getenv('CHART_TITLE');
         </span>
     </span>
 </div>
+<div id="alert3"></div>
 <canvas id="chart">
 </canvas>
 <div class="alert" id="alert1"></div>
