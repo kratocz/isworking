@@ -7,6 +7,7 @@ $title = getenv('CHART_TITLE');
     <meta charset="UTF-8">
     <title><?= $title ?></title>
     <link rel="stylesheet" href="/common.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.png">
     <script src="/lib/chart.umd.min.js"></script>
     <script src="/chart.js"></script>
 </head>
