@@ -183,11 +183,17 @@ $chartData = [
 $currentEntry = api("/api/v9/me/time_entries/current");
 $isCurrentlyWorking = $currentEntry && in_array($currentEntry->project_id, $projectIds);
 
+$cumulativeWorkedHoursDays = array_keys($cumulativeWorkedHours);
+$latestDay = end($cumulativeWorkedHoursDays);
 $data = [
     "chartData" => $chartData,
     "metadata" => [
         'currentlyWorking' => $isCurrentlyWorking,
         'lastEntryBeforeNowStopDateTime' => $lastEntryBeforeNow->stop,
+        "latestDay" => [
+            'reality' => $cumulativeWorkedHours[$latestDay],
+            'critical' => $redLineHours[$latestDay],
+        ],
     ],
 ];
 

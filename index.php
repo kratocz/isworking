@@ -28,6 +28,8 @@ $title = getenv('CHART_TITLE');
 </div>
 <canvas id="chart">
 </canvas>
+<div class="alert" id="alert1"></div>
+<div class="alert" id="alert2"></div>
 <script>
     init();
 	updateChartFromServer();

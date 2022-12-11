@@ -7,3 +7,21 @@ h1 {
     text-align: center;
 }
 
+.alert {
+    position: absolute;
+    display: block;
+    top: 20px;
+    font-weight: bold;
+    font-family: sans-serif;
+    text-transform: uppercase;
+    color: #f22;
+}
+
+#alert1 {
+    left: 20px;
+}
+
+#alert2 {
+    right: 20px;
+}
+

@@ -20,6 +20,16 @@ function updateChart(response) {
 	chart.update('none');
 	const date = new Date();
 	document.getElementById('last-update-text').innerText = date.toLocaleString();
+	console.debug('latestDay:', response.metadata.latestDay);
+	let alertText = "";
+	let htmlBodyBackgroundColor = '';
+	if (response.metadata.latestDay.reality < response.metadata.latestDay.critical) {
+		htmlBodyBackgroundColor = '#fee';
+		alertText = "Red alert";
+	}
+	document.body.style.backgroundColor = htmlBodyBackgroundColor;
+	document.getElementById('alert1').innerText = alertText;
+	document.getElementById('alert2').innerText = alertText;
 }
 
 function updateChartFromServer() {
