@@ -28,7 +28,7 @@ function updateChart(response) {
 		htmlBodyBackgroundColor = '#fee';
 		alertText = "Red alert";
 		if (!response.metadata.currentlyWorking) {
-			alert3Html = "Napiště mi: <span id='alert3Warning'>Pracuj!</span>";
+			alert3Html = "<div style='display: flex;'><div>Napiště mi: </div><div id='alert3Warning'>Pracuj!</div></div>";
 		}
 	}
 	document.body.style.backgroundColor = htmlBodyBackgroundColor;
