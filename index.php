@@ -27,12 +27,26 @@ $title = getenv('CHART_TITLE');
     </span>
 </div>
 <div id="alert3"></div>
+<div id="box-hours-above">
+    Aktuálně hodin nad:
+    <span id="hours-above-red-label">krize:</span>
+    <span id="hours-above-red">?</span> h
+    |
+    <span id="hours-above-minimum-label">minimum:</span>
+    <span id="hours-above-minimum">?</span> h
+    |
+    <span id="hours-above-optimum-label">optimum:</span>
+    <span id="hours-above-optimum">?</span> h
+    |
+    <span id="hours-above-maximum-label">maximum:</span>
+    <span id="hours-above-maximum">?</span> h
+</div>
 <canvas id="chart">
 </canvas>
 <div class="alert" id="alert1"></div>
 <div class="alert" id="alert2"></div>
 <script>
-    init();
+	init();
 	updateChartFromServer();
 </script>
 

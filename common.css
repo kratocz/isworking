@@ -37,3 +37,12 @@ h1 {
     padding: 10px;
 }
 
+#box-hours-above {
+    margin-bottom: 1em;
+    color: #aaa;
+}
+
+#box-hours-above > span {
+    color: #000;
+}
+

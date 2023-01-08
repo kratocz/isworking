@@ -175,6 +175,13 @@ $chartData = [
             "tension" => 0.1,
         ],
         [
+            "label" => "krize",
+            "data" => array_values($redLineHours),
+            "fill" => false,
+            "borderColor" => "#faa",
+            "tension" => 0.1,
+        ],
+        [
             "label" => "minimum",
             "data" => array_values($minLineHours),
             "fill" => false,
@@ -195,13 +202,6 @@ $chartData = [
             "borderColor" => "#aaf",
             "tension" => 0.1,
         ],
-        [
-            "label" => "krize",
-            "data" => array_values($redLineHours),
-            "fill" => false,
-            "borderColor" => "#faa",
-            "tension" => 0.1,
-        ],
     ],
 ];
 
@@ -217,6 +217,9 @@ $data = [
         'lastEntryBeforeNowStopDateTime' => $lastEntryBeforeNow->stop,
         "latestDay" => [
             'reality' => $cumulativeWorkedHours[$latestDay],
+            'min' => $minLineHours[$latestDay],
+            'optimal' => $optimalLineHours[$latestDay],
+            'max' => $maxLineHours[$latestDay],
             'critical' => $redLineHours[$latestDay],
         ],
     ],
