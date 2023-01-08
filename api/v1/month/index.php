@@ -1,4 +1,6 @@
 <?php
+require_once(dirname(__FILE__) . "/CalendarTools.php");
+
 $currentDateTime = new DateTime();
 $startDateString = $currentDateTime->format('Y-m-01');
 
@@ -7,6 +9,12 @@ if ($timezoneString) {
     date_default_timezone_set($timezoneString);
 }
 
+/**
+ * @deprecated replaced by CalendarTools::getPercentagesForDaysInMonth(...)
+ * @param $dayInMonth
+ * @param $totalDaysInMonth
+ * @return float|int
+ */
 function getPercentageByDayInMonth($dayInMonth, $totalDaysInMonth) {
     $percentage = $dayInMonth / ($totalDaysInMonth - 2);
     if ($percentage < 0) {
@@ -87,6 +95,23 @@ $maxLineHours = [0];
 $optimalLineHours = [0];
 $redLineHours = [0];
 $date = new DateTime($startDateString);
+$percentages = CalendarTools::getPercentagesForDaysInMonth($date);
+$hoursInDays = [];
+foreach ($percentages as $dayOfMonth => $percentage) {
+    $hoursInDays[$dayOfMonth] = new \stdClass();
+    $hoursInDays[$dayOfMonth]->min = $percentage * 140;
+    $hoursInDays[$dayOfMonth]->optimal = $percentage * 168;
+    $hoursInDays[$dayOfMonth]->max = $percentage * 200;
+}
+$redExtraHours = 0;
+foreach (array_reverse($hoursInDays, true) as $dayOfMonth => $hoursInDay) {
+    $redHours = $hoursInDays[$dayOfMonth]->min - $redExtraHours;
+    $hoursInDay->critical = max(0, min(140, $redHours));
+    if ($dayOfMonth == 1 || $hoursInDays[$dayOfMonth - 1]->min < $hoursInDays[$dayOfMonth]->min) {
+        $redExtraHours = $redExtraHours + 2;
+    }
+}
+
 $month = $date->format("m");
 $dayInMonth = 1;
 while ($month == $date->format("m")) {
@@ -94,15 +119,15 @@ while ($month == $date->format("m")) {
     if ($dateString <= Date("Y-m-d")) {
         $daysWorkedHours[$dateString] = 0;
     }
-    $dayInMonthPercentage = getPercentageByDayInMonth($dayInMonth, $totalDaysInMonth);
-    //var_dump($dayInMonthPercentage);
+    $hoursInDay = $hoursInDays[$dayInMonth];
     $daysLabel[$dateString] = $dayInMonth;
-    $minLineHours[$dateString] = $dayInMonthPercentage * 140;
-    $optimalLineHours[$dateString] = $dayInMonthPercentage * 168;
-    $maxLineHours[$dateString] = $dayInMonthPercentage * 200;
-    $redHours = $dayInMonthPercentage * 140 - ($totalDaysInMonth - 2 - $dayInMonth) * 2;
-    $redHoursLimited = max(0, min(140, $redHours));
-        $redLineHours[$dateString] = $redHoursLimited;
+    $minLineHours[$dateString] = $hoursInDay->min;
+    $optimalLineHours[$dateString] = $hoursInDay->optimal;
+    $maxLineHours[$dateString] = $hoursInDay->max;
+    //$redHours = $percentagesForRedLine[$dayInMonth] * 140;
+    //$redHoursLimited = max(0, min(140, $redHours));
+    //    $redLineHours[$dateString] = $redHoursLimited;
+    $redLineHours[$dateString] = $hoursInDay->critical;
     $date->modify("+1 day");
     $dayInMonth++;
 }
