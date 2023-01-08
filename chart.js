@@ -49,9 +49,9 @@ function updateChart(response) {
 	document.getElementById('hours-above-optimum-label').style.backgroundColor = chart.data.datasets.find(line => line.label == "optimum").borderColor;
 	document.getElementById('hours-above-maximum-label').style.backgroundColor = chart.data.datasets.find(line => line.label == "maximum").borderColor;
 	document.getElementById('hours-above-red').style.color = latestDay.reality > latestDay.critical ? "#0c0" : "#c00";
-	document.getElementById('hours-above-minimum').style.color = latestDay.reality > latestDay.minimum ? "#0c0" : "#c00";
+	document.getElementById('hours-above-minimum').style.color = latestDay.reality > latestDay.min ? "#0c0" : "#c00";
 	document.getElementById('hours-above-optimum').style.color = latestDay.reality > latestDay.optimum ? "#0c0" : "#c00";
-	document.getElementById('hours-above-maximum').style.color = latestDay.reality > latestDay.maximum ? "#0c0" : "#c00";
+	document.getElementById('hours-above-maximum').style.color = latestDay.reality > latestDay.max ? "#0c0" : "#c00";
 }
 
 function updateChartFromServer() {
