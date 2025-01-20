@@ -20,7 +20,7 @@ $title = getenv('CHART_TITLE');
 </p>
 <div style="margin-bottom: 20px;">
     <span style="font-size: 200%;">
-        <span id="isCurrentlyWorking-true" style="color: #2c2; display: none;">aktuálně pracuje</span>
+        <span id="isCurrentlyWorking-true" style="color: #2c2; display: none;"><!-- aktuálně pracuje -->Napiště mi: <span id='alert3Warning' style="color: #292;">Nepracuj nebo nepůjdeš do Galilea!</span></span>
         <span id="isCurrentlyWorking-false" style="color: #f44; display: none;">aktuálně nepracuje
             (naposledy pracoval: <span id="isCurrentlyWorking-false-last-datetime"></span>)
         </span>

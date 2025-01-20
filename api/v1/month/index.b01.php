@@ -99,12 +99,9 @@ $percentages = CalendarTools::getPercentagesForDaysInMonth($date);
 $hoursInDays = [];
 foreach ($percentages as $dayOfMonth => $percentage) {
     $hoursInDays[$dayOfMonth] = new \stdClass();
-    $hoursInDays[$dayOfMonth]->min = max($percentage * 140, 0); // default: 140
-    //$hoursInDays[$dayOfMonth]->min = max($percentage * 140 - 35, 0); // default: 140
+    $hoursInDays[$dayOfMonth]->min = $percentage * 140; // default: 140
     $hoursInDays[$dayOfMonth]->optimal = $percentage * 170; // default: 176
     $hoursInDays[$dayOfMonth]->max = $percentage * 200; // default: 200
-    //$hoursInDays[$dayOfMonth]->optimal = ($percentage <= 0.5) ? $percentage * (135 - 35) * 2 : (135 - 35) + ($percentage - 0.5) * (160 - 135) * 2;
-    //$hoursInDays[$dayOfMonth]->max = ($percentage <= 0.5) ? $percentage * (150 - 35) * 2 : (150 - 35) + ($percentage - 0.5) * (200 - 150) * 2;
 }
 $redExtraHours = 0;
 foreach (array_reverse($hoursInDays, true) as $dayOfMonth => $hoursInDay) {

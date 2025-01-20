@@ -33,7 +33,7 @@ function updateChart(response) {
 		htmlBodyBackgroundColor = '#fee';
 		alertText = "Red alert";
 		if (!response.metadata.currentlyWorking) {
-			alert3Html = "Napiště mi: <span id='alert3Warning'>Pracuj!</span>";
+			alert3Html = "Napiště mi: <span id='alert3Warning'>Pracuj nebo půjdeš do Galilea!</span>";
 		}
 	}
 	document.body.style.backgroundColor = htmlBodyBackgroundColor;
