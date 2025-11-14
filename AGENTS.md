@@ -61,6 +61,10 @@ Required in production environment:
 - `TOGGL_CLIENT_NAME` - Client name to filter projects
 - `TZ` - Timezone (e.g., "Europe/Prague")
 
+## Deployment
+
+Production deployment location: `sftp://krato@router.kratonet.cz/www/nepracuje`
+
 ## Testing
 
 `test.php` - Simple timezone diagnostic script (outputs current timezone)
