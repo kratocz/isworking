@@ -65,6 +65,29 @@ Required in production environment:
 
 Production deployment location: `sftp://krato@router.kratonet.cz/www/nepracuje`
 
+### Deployment Workflow
+
+1. **Update production server from Git:**
+   ```bash
+   ssh krato@router.kratonet.cz 'cd /www/nepracuje && git pull'
+   ```
+
+2. **Sync files from production to local (for inspection):**
+   ```bash
+   rsync -avz --exclude='.git' krato@router.kratonet.cz:/www/nepracuje/ ./
+   ```
+
+3. **Important notes:**
+   - If git pull fails due to local changes on server, use `git clean -fd && git reset --hard && git pull` to force update
+   - Always commit and push local changes before syncing to production
+   - Check file ownership if git operations fail (`.git` directory must be owned by `krato`)
+
+## Security
+
+- **API Token Security**: `TOGGL_API_TOKEN` is read from environment variables (`getenv()` in `api/v1/month/index.php:39`), not hardcoded in source code
+- **Environment Variables**: All sensitive configuration is managed via environment variables, not committed to repository
+- **No .env file**: Environment variables are set at the server/webserver level, not via `.env` files
+
 ## Testing
 
 `test.php` - Simple timezone diagnostic script (outputs current timezone)
