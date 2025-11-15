@@ -112,3 +112,10 @@ View logs:
 ```bash
 docker compose logs -f web
 ```
+
+## Security
+
+- **Environment variables**: Sensitive data (API tokens, ports) stored in `.env` file (not committed to git)
+- **Error handling**: Generic error messages prevent exposure of internal configuration and credentials
+- **Localhost binding**: Service binds to `127.0.0.1` for local-only access
+- **Redis caching**: Reduces API calls and prevents rate limit exposure

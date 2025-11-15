@@ -147,6 +147,7 @@ Toggl API v9 has two types of rate limits per hour:
 - **Environment Variables**: All sensitive configuration is managed via environment variables in `.env` file
 - **Git Ignore**: `.env` file is in `.gitignore` to prevent committing secrets
 - **Environment Template**: `.env.example` provides a template for required variables
+- **Error Handling**: Error messages return generic responses to clients while logging detailed information server-side only (prevents exposure of API tokens, PII, or internal configuration)
 
 ## Testing
 
