@@ -1,0 +1,16 @@
+version: "2.0"
+services:
+  frontend:
+    image: php:7.4-apache
+    ports:
+      - "127.0.0.1:${PORT}:80"
+    volumes:
+      - .:/var/www/html
+    environment:
+      - TZ=Europe/Prague
+      - TOGGL_CLIENT_NAME=ProfiSMS
+      #- TOGGL_CLIENT_NAME=Galileo
+      - TOGGL_API_TOKEN=${TOGGL_API_TOKEN}
+      - "CHART_TITLE=Jak moc pracuje Krato pro ProfiSMS?"
+      #- "CHART_TITLE=Jak moc pracuje Krato pro Galileo?"
+    restart: always
