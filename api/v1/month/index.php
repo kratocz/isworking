@@ -105,15 +105,17 @@ header("Access-Control-Allow-Origin: *");
 
 $me = callGetApi("/api/v9/me", 900); // Cache for 15 minutes
 if (!$me || !isset($me->default_workspace_id)) {
+    error_log('Toggl API error - /api/v9/me failed: ' . json_encode($me));
     header('Content-Type: application/json; charset=utf-8');
-    echo json_encode(['error' => 'Failed to get user info from Toggl API', 'response' => $me]);
+    echo json_encode(['error' => 'Service temporarily unavailable']);
     exit;
 }
 $workspaceId = $me->default_workspace_id;
 $clients = callGetApi("/api/v9/workspaces/$workspaceId/clients", 900); // Cache for 15 minutes
 if (!is_array($clients)) {
+    error_log('Toggl API error - clients endpoint failed for workspace ' . $workspaceId);
     header('Content-Type: application/json; charset=utf-8');
-    echo json_encode(['error' => 'Failed to get clients from Toggl API', 'response' => $clients, 'workspaceId' => $workspaceId]);
+    echo json_encode(['error' => 'Failed to retrieve client list']);
     exit;
 }
 $clientId = null;
@@ -124,8 +126,9 @@ foreach ($clients as $client) {
     }
 }
 if (!$clientId) {
+    error_log('Toggl client "' . getenv('TOGGL_CLIENT_NAME') . '" not found in workspace');
     header('Content-Type: application/json; charset=utf-8');
-    echo json_encode(['error' => 'Client not found', 'clientName' => getenv('TOGGL_CLIENT_NAME'), 'availableClients' => array_map(fn($c) => $c->name, $clients)]);
+    echo json_encode(['error' => 'Client configuration error']);
     exit;
 }
 //var_dump($clientId);
