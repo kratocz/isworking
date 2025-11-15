@@ -13,6 +13,10 @@ This is a work hours tracking dashboard that integrates with Toggl API to visual
   - Integrates with Toggl API v9 (`https://api.track.toggl.com`)
   - Requires environment variables: `TOGGL_API_TOKEN`, `TOGGL_CLIENT_NAME`, `TZ`
   - Returns JSON with chart data and metadata (current work status, hours above thresholds)
+  - **Redis Caching**: Uses Redis to cache Toggl API responses and avoid rate limits
+    - `callGetApi($endpoint, $ttl)` - GET requests with caching
+    - `callPostApi($endpoint, $postBody)` - POST requests without caching
+    - Cache keys format: `toggl:{endpoint}`
 
 - **CalendarTools** (`/api/v1/month/CalendarTools.php`) - Utility class for calendar calculations
   - Calculates work percentages per day, excluding weekends (Saturday/Sunday) and holidays (12-24, 12-25, 12-26, 01-01)
@@ -82,11 +86,67 @@ Production deployment location: `sftp://krato@router.kratonet.cz/www/nepracuje`
    - Always commit and push local changes before syncing to production
    - Check file ownership if git operations fail (`.git` directory must be owned by `krato`)
 
+## Docker Services
+
+The application runs in Docker with two services:
+
+### Web Service (`web`)
+- Built from custom Dockerfile with PHP 7.4 Apache + Redis extension
+- Mounts current directory to `/var/www/html`
+- Exposed on `127.0.0.1:${PORT}` (default: 8844)
+- Environment variables: `TZ`, `TOGGL_CLIENT_NAME`, `TOGGL_API_TOKEN`, `CHART_TITLE`
+
+### Redis Service (`redis`)
+- Image: `redis:alpine`
+- Used for caching Toggl API responses
+- Accessible from web service via hostname `redis:6379`
+- Persistent storage: `redis-data` volume
+
+### Redis Cache Management
+
+**View all cached keys:**
+```bash
+docker compose exec redis redis-cli KEYS "toggl:*"
+```
+
+**View specific cache value:**
+```bash
+docker compose exec redis redis-cli GET "toggl:/api/v9/me"
+```
+
+**Clear all cache:**
+```bash
+docker compose exec redis redis-cli FLUSHALL
+```
+
+**Check cache TTL:**
+```bash
+docker compose exec redis redis-cli TTL "toggl:/api/v9/me"
+```
+
+### Cache TTL Values
+- `/api/v9/me` - 900s (15 minutes)
+- `/api/v9/workspaces/{id}/clients` - 900s (15 minutes)
+- `/api/v9/workspaces/{id}/projects` - 900s (15 minutes)
+- `/api/v9/me/time_entries` - 30s (30 seconds)
+- `/api/v9/me/time_entries/current` - 30s (30 seconds)
+
+## Toggl API Rate Limits
+
+Toggl API v9 has two types of rate limits per hour:
+1. **General limit**: 600 requests/hour (all endpoints)
+2. **Non-workflow specific limit**: 30 requests/hour (endpoints like `/api/v9/me`, `/api/v9/workspaces/{id}/clients`, etc.)
+
+**Impact**: Without caching, the dashboard would hit the 30 req/hour limit quickly (auto-refresh every 30s = 120 requests/hour).
+
+**Solution**: Redis caching ensures non-workflow endpoints are called at most once per TTL period, staying well under the limit.
+
 ## Security
 
-- **API Token Security**: `TOGGL_API_TOKEN` is read from environment variables (`getenv()` in `api/v1/month/index.php:39`), not hardcoded in source code
-- **Environment Variables**: All sensitive configuration is managed via environment variables, not committed to repository
-- **No .env file**: Environment variables are set at the server/webserver level, not via `.env` files
+- **API Token Security**: `TOGGL_API_TOKEN` is read from environment variables, not hardcoded in source code
+- **Environment Variables**: All sensitive configuration is managed via environment variables in `.env` file
+- **Git Ignore**: `.env` file is in `.gitignore` to prevent committing secrets
+- **Environment Template**: `.env.example` provides a template for required variables
 
 ## Testing
 

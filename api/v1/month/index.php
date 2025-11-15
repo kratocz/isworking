@@ -9,6 +9,10 @@ if ($timezoneString) {
     date_default_timezone_set($timezoneString);
 }
 
+// Connect to Redis
+$redis = new Redis();
+$redis->connect('redis', 6379);
+
 /**
  * @deprecated replaced by CalendarTools::getPercentagesForDaysInMonth(...)
  * @param $dayInMonth
@@ -26,36 +30,92 @@ function getPercentageByDayInMonth($dayInMonth, $totalDaysInMonth) {
     return $percentage;
 }
 
-function api($feature, $postBody = false)
+/**
+ * Call Toggl GET API with Redis caching
+ * @param string $endpoint API endpoint (e.g., "/api/v9/me")
+ * @param int $ttl Cache TTL in seconds
+ * @return mixed Decoded JSON response
+ */
+function callGetApi($endpoint, $ttl)
 {
-    global $ch;
-    $url = "https://api.track.toggl.com$feature";
+    global $redis;
+
+    // Check cache first
+    $cacheKey = "toggl:$endpoint";
+    $cached = $redis->get($cacheKey);
+    if ($cached !== false) {
+        return json_decode($cached);
+    }
+
+    // Cache miss - call API
+    $url = "https://api.track.toggl.com$endpoint";
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         "Accept: application/json",
     ]);
-    curl_setopt($ch, CURLOPT_USERNAME, getenv('TOGGL_API_TOKEN')); // secret
+    curl_setopt($ch, CURLOPT_USERNAME, getenv('TOGGL_API_TOKEN'));
     curl_setopt($ch, CURLOPT_PASSWORD, "api_token");
-    if ($postBody !== false) {
-        $payload = json_encode($postBody);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-    }
+
     $result = curl_exec($ch);
     if ($result === false) {
+        curl_close($ch);
         die("Toggl API error: " . curl_error($ch));
     }
     curl_close($ch);
+
+    // Store in cache
+    $redis->setex($cacheKey, $ttl, $result);
+
+    return json_decode($result);
+}
+
+/**
+ * Call Toggl POST API (no caching)
+ * @param string $endpoint API endpoint
+ * @param array $postBody POST request body
+ * @return mixed Decoded JSON response
+ */
+function callPostApi($endpoint, $postBody)
+{
+    $url = "https://api.track.toggl.com$endpoint";
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        "Content-Type: application/json",
+        "Accept: application/json",
+    ]);
+    curl_setopt($ch, CURLOPT_USERNAME, getenv('TOGGL_API_TOKEN'));
+    curl_setopt($ch, CURLOPT_PASSWORD, "api_token");
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($postBody));
+
+    $result = curl_exec($ch);
+    if ($result === false) {
+        curl_close($ch);
+        die("Toggl API error: " . curl_error($ch));
+    }
+    curl_close($ch);
+
     return json_decode($result);
 }
 
 header("Access-Control-Allow-Origin: *");
 
-$me = api("/api/v9/me");
+$me = callGetApi("/api/v9/me", 900); // Cache for 15 minutes
+if (!$me || !isset($me->default_workspace_id)) {
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['error' => 'Failed to get user info from Toggl API', 'response' => $me]);
+    exit;
+}
 $workspaceId = $me->default_workspace_id;
-$clients = api("/api/v9/workspaces/$workspaceId/clients");
+$clients = callGetApi("/api/v9/workspaces/$workspaceId/clients", 900); // Cache for 15 minutes
+if (!is_array($clients)) {
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['error' => 'Failed to get clients from Toggl API', 'response' => $clients, 'workspaceId' => $workspaceId]);
+    exit;
+}
 $clientId = null;
 foreach ($clients as $client) {
     if ($client->name == getenv('TOGGL_CLIENT_NAME')) {
@@ -64,10 +124,12 @@ foreach ($clients as $client) {
     }
 }
 if (!$clientId) {
-    throw new AssertionError("clientId is not set: $clientId");
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['error' => 'Client not found', 'clientName' => getenv('TOGGL_CLIENT_NAME'), 'availableClients' => array_map(fn($c) => $c->name, $clients)]);
+    exit;
 }
 //var_dump($clientId);
-$projects = api("/api/v9/workspaces/$workspaceId/projects?client_ids=$clientId");
+$projects = callGetApi("/api/v9/workspaces/$workspaceId/projects?client_ids=$clientId", 900); // Cache for 15 minutes
 $projectIds = [];
 foreach ($projects as $project) {
     $projectIds[$project->id] = $project->id;
@@ -84,7 +146,7 @@ $totalDaysInMonth = substr($endDateString, -2);
 $afterEndDateString = date("Y-m-d", strtotime($startDateString . " + 1 month"));
 $getEntriesApiFeature = "/api/v9/me/time_entries?start_date=$startDateString&end_date=$afterEndDateString";
 //var_dump($getEntriesApiFeature);
-$entries = api($getEntriesApiFeature);
+$entries = callGetApi($getEntriesApiFeature, 30); // Cache for 30 seconds
 //var_dump($entries);
 //$currentEntry = api("/api/v9/me/time_entries/current");
 
@@ -209,7 +271,7 @@ $chartData = [
     ],
 ];
 
-$currentEntry = api("/api/v9/me/time_entries/current");
+$currentEntry = callGetApi("/api/v9/me/time_entries/current", 30); // Cache for 30 seconds
 $isCurrentlyWorking = $currentEntry && in_array($currentEntry->project_id, $projectIds);
 
 $cumulativeWorkedHoursDays = array_keys($cumulativeWorkedHours);

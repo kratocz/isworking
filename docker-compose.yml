@@ -1,7 +1,6 @@
-version: "2.0"
 services:
-  frontend:
-    image: php:7.4-apache
+  web:
+    build: .
     ports:
       - "127.0.0.1:${PORT}:80"
     volumes:
@@ -14,3 +13,12 @@ services:
       - "CHART_TITLE=Jak moc pracuje Krato pro ProfiSMS?"
       #- "CHART_TITLE=Jak moc pracuje Krato pro Galileo?"
     restart: always
+
+  redis:
+    image: redis:alpine
+    volumes:
+      - redis-data:/data
+    restart: always
+
+volumes:
+  redis-data:
