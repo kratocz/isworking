@@ -11,7 +11,7 @@ if ($timezoneString) {
 
 // Connect to Redis
 $redis = new Redis();
-$redis->connect('redis', 6379);
+$redis->connect(getenv('REDIS_HOST'), getenv('REDIS_PORT'));
 
 /**
  * @deprecated replaced by CalendarTools::getPercentagesForDaysInMonth(...)

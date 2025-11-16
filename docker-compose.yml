@@ -7,6 +7,8 @@ services:
       - .:/var/www/html
     environment:
       - TZ=Europe/Prague
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
       - TOGGL_CLIENT_NAME=ProfiSMS
       #- TOGGL_CLIENT_NAME=Galileo
       - TOGGL_API_TOKEN=${TOGGL_API_TOKEN}
