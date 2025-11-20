@@ -17,6 +17,16 @@ This is a work hours tracking dashboard that integrates with Toggl API to visual
     - `callGetApi($endpoint, $ttl)` - GET requests with caching
     - `callPostApi($endpoint, $postBody)` - POST requests without caching
     - Cache keys format: `toggl:{endpoint}`
+    - **Cache Strategy**:
+      - Caches all HTTP 200 responses (including null/empty responses)
+      - Does not cache non-200 responses (e.g., HTTP 402 rate limit errors)
+      - Validates cached data using `json_last_error()` to detect corrupted cache
+      - Automatically removes invalid cached data and refetches from API
+    - **Logging**: All API calls and cache operations are logged to stderr for debugging
+      - `Toggl API cache HIT: {endpoint}` - Request served from cache
+      - `Toggl API cache MISS - calling API: {endpoint}` - Cache miss, calling API
+      - `Toggl API response cached: {endpoint} (HTTP {code})` - Response successfully cached
+      - `Toggl API response NOT cached: {endpoint} (HTTP {code})` - Non-200 response not cached
 
 - **CalendarTools** (`/api/v1/month/CalendarTools.php`) - Utility class for calendar calculations
   - Calculates work percentages per day, excluding weekends (Saturday/Sunday) and holidays (12-24, 12-25, 12-26, 01-01)
@@ -149,6 +159,23 @@ Toggl API v9 has two types of rate limits per hour:
 **Impact**: Without caching, the dashboard would hit the 30 req/hour limit quickly (auto-refresh every 30s = 120 requests/hour).
 
 **Solution**: Redis caching ensures non-workflow endpoints are called at most once per TTL period, staying well under the limit.
+
+**Rate Limit Response**: When rate limit is exceeded, Toggl API returns:
+- HTTP 402 (Payment Required)
+- Response body: "You have hit your hourly limit for API calls. Please upgrade to a paid plan..."
+- The application correctly does NOT cache these error responses
+- Rate limit resets after 1 hour
+
+**Troubleshooting Rate Limits**:
+```bash
+# Check logs for rate limit errors and cache behavior
+docker-compose logs -f web | grep "Toggl API"
+```
+
+Look for:
+- `HTTP 402` - Rate limit hit
+- `cache HIT` vs `cache MISS` ratio - Should be mostly HITs
+- `response NOT cached` - Should only appear for non-200 responses
 
 ## Security
 
