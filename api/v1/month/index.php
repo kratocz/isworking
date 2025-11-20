@@ -43,9 +43,12 @@ function callGetApi($endpoint, $ttl)
     // Check cache first
     $cacheKey = "toggl:$endpoint";
     $cached = $redis->get($cacheKey);
-    if ($cached !== false) {
+    if ($cached !== false && !empty($cached) && $cached !== 'null') {
         error_log("Toggl API cache HIT: $endpoint");
         return json_decode($cached);
+    } elseif ($cached !== false) {
+        error_log("Toggl API cache HIT but invalid data, removing: $endpoint");
+        $redis->del($cacheKey);
     }
 
     // Cache miss - call API
@@ -61,14 +64,23 @@ function callGetApi($endpoint, $ttl)
     curl_setopt($ch, CURLOPT_PASSWORD, "api_token");
 
     $result = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
     if ($result === false) {
+        $error = curl_error($ch);
         curl_close($ch);
-        die("Toggl API error: " . curl_error($ch));
+        error_log("Toggl API curl error for $endpoint: $error");
+        die("Toggl API error: " . $error);
     }
     curl_close($ch);
 
-    // Store in cache
-    $redis->setex($cacheKey, $ttl, $result);
+    // Only cache successful responses with valid data
+    if ($httpCode === 200 && !empty($result) && $result !== 'null') {
+        $redis->setex($cacheKey, $ttl, $result);
+        error_log("Toggl API response cached: $endpoint (HTTP $httpCode)");
+    } else {
+        error_log("Toggl API response NOT cached: $endpoint (HTTP $httpCode, empty or invalid response)");
+    }
 
     return json_decode($result);
 }
