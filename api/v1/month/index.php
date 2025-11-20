@@ -43,12 +43,15 @@ function callGetApi($endpoint, $ttl)
     // Check cache first
     $cacheKey = "toggl:$endpoint";
     $cached = $redis->get($cacheKey);
-    if ($cached !== false && !empty($cached) && $cached !== 'null') {
-        error_log("Toggl API cache HIT: $endpoint");
-        return json_decode($cached);
-    } elseif ($cached !== false) {
-        error_log("Toggl API cache HIT but invalid data, removing: $endpoint");
-        $redis->del($cacheKey);
+    if ($cached !== false) {
+        $decoded = json_decode($cached);
+        if ($decoded !== null && $decoded !== false) {
+            error_log("Toggl API cache HIT: $endpoint");
+            return $decoded;
+        } else {
+            error_log("Toggl API cache HIT but invalid data (decoded to null), removing: $endpoint [raw: " . substr($cached, 0, 100) . "]");
+            $redis->del($cacheKey);
+        }
     }
 
     // Cache miss - call API
