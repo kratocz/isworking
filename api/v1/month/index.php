@@ -44,10 +44,12 @@ function callGetApi($endpoint, $ttl)
     $cacheKey = "toggl:$endpoint";
     $cached = $redis->get($cacheKey);
     if ($cached !== false) {
+        error_log("Toggl API cache HIT: $endpoint");
         return json_decode($cached);
     }
 
     // Cache miss - call API
+    error_log("Toggl API cache MISS - calling API: $endpoint");
     $url = "https://api.track.toggl.com$endpoint";
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -79,6 +81,7 @@ function callGetApi($endpoint, $ttl)
  */
 function callPostApi($endpoint, $postBody)
 {
+    error_log("Toggl API POST request: $endpoint");
     $url = "https://api.track.toggl.com$endpoint";
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
