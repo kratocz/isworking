@@ -45,11 +45,12 @@ function callGetApi($endpoint, $ttl)
     $cached = $redis->get($cacheKey);
     if ($cached !== false) {
         $decoded = json_decode($cached);
-        if ($decoded !== null && $decoded !== false) {
+        // Check if JSON decode was successful (even if result is null)
+        if (json_last_error() === JSON_ERROR_NONE) {
             error_log("Toggl API cache HIT: $endpoint");
             return $decoded;
         } else {
-            error_log("Toggl API cache HIT but invalid data (decoded to null), removing: $endpoint [raw: " . substr($cached, 0, 100) . "]");
+            error_log("Toggl API cache HIT but invalid JSON, removing: $endpoint [raw: " . substr($cached, 0, 100) . "]");
             $redis->del($cacheKey);
         }
     }
@@ -77,12 +78,12 @@ function callGetApi($endpoint, $ttl)
     }
     curl_close($ch);
 
-    // Only cache successful responses with valid data
-    if ($httpCode === 200 && !empty($result) && $result !== 'null') {
+    // Cache all HTTP 200 responses (including null/empty - they are valid responses)
+    if ($httpCode === 200) {
         $redis->setex($cacheKey, $ttl, $result);
         error_log("Toggl API response cached: $endpoint (HTTP $httpCode)");
     } else {
-        error_log("Toggl API response NOT cached: $endpoint (HTTP $httpCode, empty or invalid response)");
+        error_log("Toggl API response NOT cached: $endpoint (HTTP $httpCode - non-200 status)");
     }
 
     return json_decode($result);
