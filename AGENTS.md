@@ -76,12 +76,21 @@ Production deployment location: `sftp://krato@router.kratonet.cz/www/nepracuje`
    ssh krato@router.kratonet.cz 'cd /www/nepracuje && git pull'
    ```
 
-2. **Sync files from production to local (for inspection):**
+2. **Restart Docker service (requires manual execution with sudo):**
+   ```bash
+   ssh krato@router.kratonet.cz
+   cd /www
+   sudo docker-compose up -d nepracuje
+   ```
+
+3. **Sync files from production to local (for inspection):**
    ```bash
    rsync -avz --exclude='.git' krato@router.kratonet.cz:/www/nepracuje/ ./
    ```
 
-3. **Important notes:**
+4. **Important notes:**
+   - Production uses centralized `/www/docker-compose.yml` for all services, not the local `docker-compose.yml` in `/www/nepracuje/`
+   - Docker commands require `sudo` on production server
    - If git pull fails due to local changes on server, use `git clean -fd && git reset --hard && git pull` to force update
    - Always commit and push local changes before syncing to production
    - Check file ownership if git operations fail (`.git` directory must be owned by `krato`)
