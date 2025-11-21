@@ -147,8 +147,10 @@ docker compose exec redis redis-cli TTL "toggl:/api/v9/me"
 - `/api/v9/me` - 900s (15 minutes)
 - `/api/v9/workspaces/{id}/clients` - 900s (15 minutes)
 - `/api/v9/workspaces/{id}/projects` - 900s (15 minutes)
-- `/api/v9/me/time_entries` - 30s (30 seconds)
-- `/api/v9/me/time_entries/current` - 30s (30 seconds)
+- `/api/v9/me/time_entries` - 900s (15 minutes)
+- `/api/v9/me/time_entries/current` - 900s (15 minutes)
+
+**Note**: All time entry endpoints use `/api/v9/me/*` paths (user-specific) because workspace-scoped GET endpoints do not exist for time entries. These count toward the 30 requests/hour limit for user-specific endpoints, hence the 15-minute cache TTL.
 
 ## Toggl API Rate Limits
 
