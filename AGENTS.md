@@ -37,6 +37,7 @@ This is a work hours tracking dashboard that integrates with Toggl API to visual
 - **Main Page**: `index.php` - Dashboard HTML structure
   - Displays chart title from `CHART_TITLE` environment variable
   - Auto-refreshes every 15 minutes
+  - Implements cache busting for `chart.js` using file modification time (e.g., `?v=1234567890`)
 
 - **Chart Logic**: `chart.js` - Client-side visualization
   - Uses Chart.js library (`/lib/chart.umd.min.js`) for rendering
@@ -101,7 +102,7 @@ Production deployment location: `sftp://krato@ipv4.router.kratonet.cz/www/neprac
 4. **Important notes:**
    - Production uses centralized `/www/docker-compose.yml` for all services, not the local `docker-compose.yml` in `/www/nepracuje/`
    - Docker commands require `sudo` on production server
-   - If git pull fails due to local changes on server, use `git clean -fd && git reset --hard && git pull` to force update
+   - If git pull fails due to local changes on server, use `git reset --hard && git pull` to force update (add `git clean -fd` to remove untracked files, but note it may fail on Docker-mounted volumes due to permissions)
    - Always commit and push local changes before syncing to production
    - Check file ownership if git operations fail (`.git` directory must be owned by `krato`)
 
