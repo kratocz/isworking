@@ -9,7 +9,7 @@ $title = getenv('CHART_TITLE');
     <link rel="stylesheet" href="/common.css">
     <link rel="icon" type="image/x-icon" href="/favicon.png">
     <script src="/lib/chart.umd.min.js"></script>
-    <script src="/chart.js"></script>
+    <script src="/chart.js?v=<?= filemtime('chart.js') ?>"></script>
 </head>
 <body>
 <h1><?= $title ?></h1>
