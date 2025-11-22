@@ -36,7 +36,7 @@ This is a work hours tracking dashboard that integrates with Toggl API to visual
 ### Frontend
 - **Main Page**: `index.php` - Dashboard HTML structure
   - Displays chart title from `CHART_TITLE` environment variable
-  - Auto-refreshes every 30 seconds
+  - Auto-refreshes every 15 minutes
 
 - **Chart Logic**: `chart.js` - Client-side visualization
   - Uses Chart.js library (`/lib/chart.umd.min.js`) for rendering
@@ -55,8 +55,8 @@ Percentages are calculated by `CalendarTools::getPercentagesForDaysInMonth()` wh
 
 ## Key Data Flow
 
-1. Browser loads `index.php` → initializes chart and starts 30s refresh interval
-2. JavaScript calls `/api/v1/month/` every 30 seconds
+1. Browser loads `index.php` → initializes chart and starts 15min refresh interval
+2. JavaScript calls `/api/v1/month/` every 15 minutes
 3. PHP API:
    - Authenticates with Toggl API using `TOGGL_API_TOKEN`
    - Finds workspace and client by `TOGGL_CLIENT_NAME`
@@ -77,25 +77,25 @@ Required in production environment:
 
 ## Deployment
 
-Production deployment location: `sftp://krato@router.kratonet.cz/www/nepracuje`
+Production deployment location: `sftp://krato@ipv4.router.kratonet.cz/www/nepracuje`
 
 ### Deployment Workflow
 
 1. **Update production server from Git:**
    ```bash
-   ssh krato@router.kratonet.cz 'cd /www/nepracuje && git pull'
+   ssh krato@ipv4.router.kratonet.cz 'cd /www/nepracuje && git pull'
    ```
 
 2. **Restart Docker service (requires manual execution with sudo):**
    ```bash
-   ssh krato@router.kratonet.cz
+   ssh krato@ipv4.router.kratonet.cz
    cd /www
    sudo docker-compose up -d nepracuje
    ```
 
 3. **Sync files from production to local (for inspection):**
    ```bash
-   rsync -avz --exclude='.git' krato@router.kratonet.cz:/www/nepracuje/ ./
+   rsync -avz --exclude='.git' krato@ipv4.router.kratonet.cz:/www/nepracuje/ ./
    ```
 
 4. **Important notes:**
@@ -158,7 +158,7 @@ Toggl API v9 has two types of rate limits per hour:
 1. **General limit**: 600 requests/hour (all endpoints)
 2. **Non-workflow specific limit**: 30 requests/hour (endpoints like `/api/v9/me`, `/api/v9/workspaces/{id}/clients`, etc.)
 
-**Impact**: Without caching, the dashboard would hit the 30 req/hour limit quickly (auto-refresh every 30s = 120 requests/hour).
+**Impact**: Without caching, the dashboard consumes API quota (auto-refresh every 15min = 4 requests/hour).
 
 **Solution**: Redis caching ensures non-workflow endpoints are called at most once per TTL period, staying well under the limit.
 
