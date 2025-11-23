@@ -122,7 +122,7 @@ function callPostApi($endpoint, $postBody)
 
 header("Access-Control-Allow-Origin: *");
 
-$me = callGetApi("/api/v9/me", 900); // Cache for 15 minutes
+$me = callGetApi("/api/v9/me", 1800); // Cache for 30 minutes
 if (!$me || !isset($me->default_workspace_id)) {
     error_log('Toggl API error - /api/v9/me failed: ' . json_encode($me));
     header('Content-Type: application/json; charset=utf-8');
@@ -130,7 +130,7 @@ if (!$me || !isset($me->default_workspace_id)) {
     exit;
 }
 $workspaceId = $me->default_workspace_id;
-$clients = callGetApi("/api/v9/workspaces/$workspaceId/clients", 900); // Cache for 15 minutes
+$clients = callGetApi("/api/v9/workspaces/$workspaceId/clients", 600); // Cache for 10 minutes
 if (!is_array($clients)) {
     error_log('Toggl API error - clients endpoint failed for workspace ' . $workspaceId);
     header('Content-Type: application/json; charset=utf-8');
@@ -151,7 +151,7 @@ if (!$clientId) {
     exit;
 }
 //var_dump($clientId);
-$projects = callGetApi("/api/v9/workspaces/$workspaceId/projects?client_ids=$clientId", 900); // Cache for 15 minutes
+$projects = callGetApi("/api/v9/workspaces/$workspaceId/projects?client_ids=$clientId", 600); // Cache for 10 minutes
 $projectIds = [];
 foreach ($projects as $project) {
     $projectIds[$project->id] = $project->id;
@@ -168,7 +168,7 @@ $totalDaysInMonth = substr($endDateString, -2);
 $afterEndDateString = date("Y-m-d", strtotime($startDateString . " + 1 month"));
 $getEntriesApiFeature = "/api/v9/me/time_entries?start_date=$startDateString&end_date=$afterEndDateString";
 //var_dump($getEntriesApiFeature);
-$entries = callGetApi($getEntriesApiFeature, 900); // Cache for 15 minutes (same as other user-specific endpoints)
+$entries = callGetApi($getEntriesApiFeature, 600); // Cache for 10 minutes (same as other user-specific endpoints)
 //var_dump($entries);
 //$currentEntry = api("/api/v9/me/time_entries/current");
 
@@ -293,7 +293,7 @@ $chartData = [
     ],
 ];
 
-$currentEntry = callGetApi("/api/v9/me/time_entries/current", 900); // Cache for 15 minutes (same as other user-specific endpoints)
+$currentEntry = callGetApi("/api/v9/me/time_entries/current", 600); // Cache for 10 minutes (same as other user-specific endpoints)
 $isCurrentlyWorking = $currentEntry && in_array($currentEntry->project_id, $projectIds);
 
 $cumulativeWorkedHoursDays = array_keys($cumulativeWorkedHours);

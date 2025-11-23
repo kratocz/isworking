@@ -36,7 +36,7 @@ This is a work hours tracking dashboard that integrates with Toggl API to visual
 ### Frontend
 - **Main Page**: `index.php` - Dashboard HTML structure
   - Displays chart title from `CHART_TITLE` environment variable
-  - Auto-refreshes every 15 minutes
+  - Auto-refreshes every 10 minutes
   - Implements cache busting for `chart.js` using file modification time (e.g., `?v=1234567890`)
 
 - **Chart Logic**: `chart.js` - Client-side visualization
@@ -56,8 +56,8 @@ Percentages are calculated by `CalendarTools::getPercentagesForDaysInMonth()` wh
 
 ## Key Data Flow
 
-1. Browser loads `index.php` → initializes chart and starts 15min refresh interval
-2. JavaScript calls `/api/v1/month/` every 15 minutes
+1. Browser loads `index.php` → initializes chart and starts 10min refresh interval
+2. JavaScript calls `/api/v1/month/` every 10 minutes
 3. PHP API:
    - Authenticates with Toggl API using `TOGGL_API_TOKEN`
    - Finds workspace and client by `TOGGL_CLIENT_NAME`
@@ -145,13 +145,13 @@ docker compose exec redis redis-cli TTL "toggl:/api/v9/me"
 ```
 
 ### Cache TTL Values
-- `/api/v9/me` - 900s (15 minutes)
-- `/api/v9/workspaces/{id}/clients` - 900s (15 minutes)
-- `/api/v9/workspaces/{id}/projects` - 900s (15 minutes)
-- `/api/v9/me/time_entries` - 900s (15 minutes)
-- `/api/v9/me/time_entries/current` - 900s (15 minutes)
+- `/api/v9/me` - 1800s (30 minutes)
+- `/api/v9/workspaces/{id}/clients` - 600s (10 minutes)
+- `/api/v9/workspaces/{id}/projects` - 600s (10 minutes)
+- `/api/v9/me/time_entries` - 600s (10 minutes)
+- `/api/v9/me/time_entries/current` - 600s (10 minutes)
 
-**Note**: All time entry endpoints use `/api/v9/me/*` paths (user-specific) because workspace-scoped GET endpoints do not exist for time entries. These count toward the 30 requests/hour limit for user-specific endpoints, hence the 15-minute cache TTL.
+**Note**: All time entry endpoints use `/api/v9/me/*` paths (user-specific) because workspace-scoped GET endpoints do not exist for time entries. These count toward the 30 requests/hour limit for user-specific endpoints, hence the 10-minute cache TTL.
 
 ## Toggl API Rate Limits
 
@@ -159,7 +159,7 @@ Toggl API v9 has two types of rate limits per hour:
 1. **General limit**: 600 requests/hour (all endpoints)
 2. **Non-workflow specific limit**: 30 requests/hour (endpoints like `/api/v9/me`, `/api/v9/workspaces/{id}/clients`, etc.)
 
-**Impact**: Without caching, the dashboard consumes API quota (auto-refresh every 15min = 4 requests/hour).
+**Impact**: Without caching, the dashboard consumes API quota (auto-refresh every 10min = 6 requests/hour).
 
 **Solution**: Redis caching ensures non-workflow endpoints are called at most once per TTL period, staying well under the limit.
 

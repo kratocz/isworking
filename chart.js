@@ -1,6 +1,6 @@
 let refreshingInterval;
 let chart;
-const lastUpdateInterval = 900;
+const lastUpdateInterval = 600;
 
 function init() {
 	const config = {
