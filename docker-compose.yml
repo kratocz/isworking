@@ -9,10 +9,12 @@ services:
       - TZ=Europe/Prague
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
-      - TOGGL_CLIENT_NAME=ProfiSMS
+      - TOGGL_CLIENT_NAME=NTIT
+      #- TOGGL_CLIENT_NAME=ProfiSMS
       #- TOGGL_CLIENT_NAME=Galileo
       - TOGGL_API_TOKEN=${TOGGL_API_TOKEN}
-      - "CHART_TITLE=Jak moc pracuje Krato pro ProfiSMS?"
+      - "CHART_TITLE=Jak moc pracuje Krato pro NTIT?"
+      #- "CHART_TITLE=Jak moc pracuje Krato pro ProfiSMS?"
       #- "CHART_TITLE=Jak moc pracuje Krato pro Galileo?"
     restart: always
 

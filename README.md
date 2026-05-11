@@ -39,7 +39,7 @@ This PHP-based application displays real-time charts showing cumulative billable
 3. **Configure environment variables in `.env`**
    - `PORT` - Web service port (default: 8844)
    - `TOGGL_API_TOKEN` - Get your token from https://track.toggl.com/profile
-   - `TOGGL_CLIENT_NAME` - Client name to filter projects (e.g., "ProfiSMS")
+   - `TOGGL_CLIENT_NAME` - Client name to filter projects (e.g., "NTIT")
    - `CHART_TITLE` - Dashboard page title
    - `TZ` - Timezone (e.g., "Europe/Prague")
 
