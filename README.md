@@ -65,7 +65,7 @@ See `.env.example` for a template.
 
 ## Tech Stack
 
-- **Backend**: PHP 7.4 with Apache
+- **Backend**: PHP 8.4 with Apache
 - **Frontend**: JavaScript with Chart.js for visualization
 - **Caching**: Redis for API response caching
 - **Deployment**: Docker Compose
@@ -92,7 +92,7 @@ docker compose exec redis redis-cli FLUSHALL
 
 ## Architecture
 
-- **Web service**: PHP 7.4 Apache with custom Dockerfile (includes Redis extension)
+- **Web service**: PHP 8.4 Apache with custom Dockerfile (includes Redis extension)
 - **Redis service**: Alpine-based Redis for caching
 - **Persistent storage**: Redis data volume for cache persistence
 

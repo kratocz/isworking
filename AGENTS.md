@@ -111,7 +111,7 @@ Production deployment location: `sftp://krato@ipv4.router.kratonet.cz/www/neprac
 The application runs in Docker with two services:
 
 ### Web Service (`web`)
-- Built from custom Dockerfile with PHP 7.4 Apache + Redis extension
+- Built from custom Dockerfile with PHP 8.4 Apache + Redis extension
 - Mounts current directory to `/var/www/html`
 - Exposed on `127.0.0.1:${PORT}` (default: 8844)
 - Environment variables: `TZ`, `TOGGL_CLIENT_NAME`, `TOGGL_API_TOKEN`, `CHART_TITLE`
