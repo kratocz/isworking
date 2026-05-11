@@ -1,7 +1,7 @@
-FROM php:7.4-apache
+FROM php:8.4-apache
 
 # Install Redis extension
-RUN pecl install redis-5.3.7 \
+RUN pecl install redis \
     && docker-php-ext-enable redis
 
 # Set working directory
