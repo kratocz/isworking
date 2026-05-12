@@ -225,10 +225,16 @@ foreach ($entries as $entry) {
     //var_dump($entry->stop);
     //var_dump($entry);
     if ($entry->billable && in_array($entry->project_id, $projectIds)) {
-        $entryStartDateString = substr($entry->start, 10);
-        $duration = $entry->duration >= 0 ? $entry->duration : $entry->duration = time() + $entry->duration;
+        if ($entry->duration >= 0) {
+            $duration = $entry->duration;
+        } else {
+            // Running entry: derive from $entry->start instead of trusting $entry->duration,
+            // which Toggl occasionally returns as -1 (or other sentinel) and the legacy
+            // formula time() + duration then produces ~1.7e9 s (~489k h).
+            $startTimestamp = strtotime($entry->start);
+            $duration = $startTimestamp !== false ? max(0, time() - $startTimestamp) : 0;
+        }
         $daysWorkedHours[substr($entry->start, 0, 10)] += $duration / 3600;
-        //var_dump([$entry->duration, $duration / 3600]);
     }
     if (($entry->stop ?? false) && in_array($entry->project_id, $projectIds)) {
         if (!$lastEntryBeforeNow || $lastEntryBeforeNow->stop < $entry->stop) {
