@@ -168,7 +168,7 @@ $totalDaysInMonth = substr($endDateString, -2);
 $afterEndDateString = date("Y-m-d", strtotime($startDateString . " + 1 month"));
 $getEntriesApiFeature = "/api/v9/me/time_entries?start_date=$startDateString&end_date=$afterEndDateString";
 //var_dump($getEntriesApiFeature);
-$entries = callGetApi($getEntriesApiFeature, 600); // Cache for 10 minutes (same as other user-specific endpoints)
+$entries = callGetApi($getEntriesApiFeature, 60); // Cache for 1 minute
 //var_dump($entries);
 //$currentEntry = api("/api/v9/me/time_entries/current");
 
@@ -299,7 +299,7 @@ $chartData = [
     ],
 ];
 
-$currentEntry = callGetApi("/api/v9/me/time_entries/current", 600); // Cache for 10 minutes (same as other user-specific endpoints)
+$currentEntry = callGetApi("/api/v9/me/time_entries/current", 60); // Cache for 1 minute
 $isCurrentlyWorking = $currentEntry && in_array($currentEntry->project_id, $projectIds);
 
 $cumulativeWorkedHoursDays = array_keys($cumulativeWorkedHours);

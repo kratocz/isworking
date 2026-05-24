@@ -148,20 +148,22 @@ docker compose exec redis redis-cli TTL "toggl:/api/v9/me"
 - `/api/v9/me` - 1800s (30 minutes)
 - `/api/v9/workspaces/{id}/clients` - 600s (10 minutes)
 - `/api/v9/workspaces/{id}/projects` - 600s (10 minutes)
-- `/api/v9/me/time_entries` - 600s (10 minutes)
-- `/api/v9/me/time_entries/current` - 600s (10 minutes)
+- `/api/v9/me/time_entries` - 60s (1 minute)
+- `/api/v9/me/time_entries/current` - 60s (1 minute)
 
-**Note**: All time entry endpoints use `/api/v9/me/*` paths (user-specific) because workspace-scoped GET endpoints do not exist for time entries. These count toward the 30 requests/hour limit for user-specific endpoints, hence the 10-minute cache TTL.
+**Note**: All time entry endpoints use `/api/v9/me/*` paths (user-specific) because workspace-scoped GET endpoints do not exist for time entries. Time-entry endpoints have short TTL so the dashboard's "currently working" status and chart reflect recent activity quickly.
 
 ## Toggl API Rate Limits
 
-Toggl API v9 has two types of rate limits per hour:
+Toggl API v9 has two types of rate limits per hour (values observed 2026-05-25 on Premium plan; lower plans may differ):
 1. **General limit**: 600 requests/hour (all endpoints)
-2. **Non-workflow specific limit**: 30 requests/hour (endpoints like `/api/v9/me`, `/api/v9/workspaces/{id}/clients`, etc.)
+2. **User-specific limit**: 600 requests/hour (endpoints like `/api/v9/me`, `/api/v9/me/time_entries`, etc.)
 
-**Impact**: Without caching, the dashboard consumes API quota (auto-refresh every 10min = 6 requests/hour).
+Current usage can be inspected in the Toggl web UI (e.g. "You've used X / 600 requests from user specific requests quota").
 
-**Solution**: Redis caching ensures non-workflow endpoints are called at most once per TTL period, staying well under the limit.
+**Impact**: Without caching, each dashboard refresh issues 5 Toggl API calls. Auto-refresh every 10min ⇒ 30 calls/hour per open browser tab — uncomfortably close to the legacy 30/hour cap that previously applied.
+
+**Solution**: Redis caching keeps stable endpoints (`/me`, `/clients`, `/projects`) far below the limit; time-entry endpoints have a short 60s TTL for freshness, which is safe under the current 600/hour cap.
 
 **Rate Limit Response**: When rate limit is exceeded, Toggl API returns:
 - HTTP 402 (Payment Required)
