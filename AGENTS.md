@@ -78,25 +78,25 @@ Required in production environment:
 
 ## Deployment
 
-Production deployment location: `sftp://krato@ipv4.router.kratonet.cz/www/nepracuje`
+Production deployment location: `sftp://krato@web6.krato.cz/www/nepracuje`
 
 ### Deployment Workflow
 
 1. **Update production server from Git:**
    ```bash
-   ssh krato@ipv4.router.kratonet.cz 'cd /www/nepracuje && git pull'
+   ssh krato@web6.krato.cz 'cd /www/nepracuje && git pull'
    ```
 
 2. **Restart Docker service (requires manual execution with sudo):**
    ```bash
-   ssh krato@ipv4.router.kratonet.cz
+   ssh krato@web6.krato.cz
    cd /www
    sudo docker-compose up -d nepracuje
    ```
 
 3. **Sync files from production to local (for inspection):**
    ```bash
-   rsync -avz --exclude='.git' krato@ipv4.router.kratonet.cz:/www/nepracuje/ ./
+   rsync -avz --exclude='.git' krato@web6.krato.cz:/www/nepracuje/ ./
    ```
 
 4. **Important notes:**
